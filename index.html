@@ -371,6 +371,8 @@
 
 				var Win = $(window);
 				var Doc = $(document);
+				var readerModel;
+				var readerUI;  //提成全局变量
 				var RootContainer = $('#xiaoshuo_container');
 				var initFontSize = Util.StorageGetter('font-size');
 				initFontSize = parseInt(initFontSize);
@@ -385,9 +387,9 @@
 					//整个项目的入口函数
 					
 					//取回数据
-					var readerModel = ReaderModel();
+					readerModel = ReaderModel();
 					//初始化UI
-					var readerUI = ReaderBaseFrame(RootContainer);
+					readerUI = ReaderBaseFrame(RootContainer);
 					
 					readerModel.init(function(data){
 						readerUI(data);
@@ -403,6 +405,7 @@
 				function ReaderModel(){
 					//todo 实现和阅读器相关的数据交互方法
 					var Chapter_id;
+					var ChapterTotal;
 					var init = function(UIcallback){
 						getFictionInfo(function(){
 							getCurChapterContent(Chapter_id,function(data){
@@ -416,7 +419,7 @@
 							//获得章节信息之后的回调
 							
 							Chapter_id = data.chapters[1].chapter_id;
-
+							ChapterTotal = data.chapters.length;
 							callback && callback();
 						},'json');
 					}
@@ -433,8 +436,28 @@
 						},'json')
 					}
 
+					//翻上一页
+					var prenChapter = function(UIcallback){
+						Chapter_id = parseInt(Chapter_id,10);
+						if (Chapter_id == 0) {
+							return;
+						}
+						Chapter_id -= 1;
+						getCurChapterContent(Chapter_id,UIcallback)
+					}
+					//翻下一页
+					var nextChapter = function(UIcallback){
+						Chapter_id = parseInt(Chapter_id,10);
+						if (Chapter_id == ChapterTotal) {
+							return;
+						}
+						Chapter_id += 1;
+						getCurChapterContent(Chapter_id,UIcallback)
+					}
 					return {
-						init
+						init,
+						nextChapter,
+						prenChapter
 					}
 				}
 				function ReaderBaseFrame(container){
@@ -446,9 +469,9 @@
 						for(var i = 0;i< jsonObj.p.length; i++){
 							html += '<p>'+ jsonObj.p[i] + '</p>';
 						}
-						console.log(html);
+						// console.log(html);
 						return html;
-						console.log(html);
+						// console.log(html);
 					}
 					return function(data){
 						//放到指定容器内
@@ -504,6 +527,19 @@
 						initFontSize -= 1;
 						RootContainer.css('font-size',initFontSize);
 						Util.StorageSetter('font-size',initFontSize);
+					});
+
+					$('#prev_button').click(function(){
+						//获得章节的翻页数据  并渲染
+						readerModel.prenChapter(function(data){
+							readerUI(data);
+						});
+					});
+
+					$('#next_button').click(function(){
+						readerModel.nextChapter(function(data){
+							readerUI(data);
+						});
 					});
 
 
