@@ -17,6 +17,34 @@
 				overflow: hidden;
 				background: #D0D052;
 			}
+			.bottom-nav-bk {
+				position: fixed;
+				bottom: 0px;
+				height: 70px;
+				background: #000;
+				width: 100%;
+				opacity: .9;
+				z-index: 10004
+			}
+
+			.bottom-nav {
+				position: fixed;
+				bottom: 0px;
+				height: 70px;
+				background: none;
+				width: 100%;
+				opacity: 1;
+				z-index: 10004;
+				margin: 0 auto;
+				text-align: center
+			}
+			.bottom-nav .item {
+				display: inline-block;
+				width: 32%;
+				color: #fff;
+				text-align: center;
+				margin: 0 auto;
+			}
 			.m-read-content{
 				font-size: 14px;
 				color: #222;
@@ -194,11 +222,21 @@
 				margin: 0 auto;
 				position: relative;
 			}
+			.artical-action-mid{
+				position: fixed;
+				z-index: 100050;
+				width: 100%;
+				height: 40%;
+				top: 30%;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="root" class="container">
-			<div id="top-nav" class="top-nav">
+			<div class="m-artical-action">
+				<div class="artical-action-mid" id="action-mid"></div>
+			</div>
+			<div id="top-nav" class="top-nav" style="display: none;">
 				<div class="icon-back"><</div>
 				<div class="nav-title">返回书架</div>
 			</div>
@@ -222,8 +260,8 @@
 					<li id="next_button">下一章</li>
 				</ul>
 			</div>
-			<div class="nav-pannel-bk"></div>
-			<div class="nav-pannel" id="font-container">
+			<div class="nav-pannel-bk" style="display: none;"></div>
+			<div class="nav-pannel" id="font-container"  style="display: none;">
 				<div class="child-mod">
 					<span>字号</span>
 					<button id="large-font" class="font-size-button">大</button>
@@ -247,9 +285,9 @@
 			</div>
 
 
-			<div class="bottom-nav-bk bottom_nav"></div>
+			<div class="bottom-nav-bk bottom_nav" style="display: none;"></div>
 
-			<div class="bottom-nav bottom_nav">
+			<div class="bottom-nav bottom_nav" style="display: none;">
 				<div class="item menu-button" id="menu_button">
 					<div class="item-warp">
 						<div class="icon-menu"></div>
@@ -305,8 +343,16 @@
 						StorageGetter
 					}
 				})();
+
+				var Dom = {
+					top_nav:$('#top-nav'),
+					buttom_nav:$('.bottom_nav')
+				} 
+				var Win = $(window);
+				var Doc = $(document);
 				function main(){
 					//整个项目的入口函数
+					EventHanlder();
 				}
 				function ReaderModel(){
 					//todo 实现和阅读器相关的数据交互方法
@@ -316,6 +362,19 @@
 				}
 				function EventHanlder(){
 					//交互事件绑定
+					$('#action-mid').click(function(){
+						if (Dom.top_nav.css('display') == 'none') {
+							Dom.top_nav.show();
+							Dom.buttom_nav.show();	
+						}else{
+							Dom.top_nav.hide();
+							Dom.buttom_nav.hide();
+						}
+					});
+					Win.scroll(function(){
+						Dom.top_nav.hide();
+						Dom.buttom_nav.hide();
+					})
 				}
 
 				main();
