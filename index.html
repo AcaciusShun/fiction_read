@@ -252,16 +252,9 @@
 
 			<div id="xiaoshuo_chapter_title"></div>
 			<div id="xiaoshuo_container" class="m-read-content">
-				<h4>《边城》题记</h4>
-				<p>
-					对于农人与兵士，怀了不可言说的温爱，这点感情在我一切作品中，随处都可以看出。我从不隐讳这点感情。我生长于作品中所写到的那类小乡城，我的祖父，父亲以及兄弟，全列身军籍：死去的莫不在职务上死去，不死的也必然的将在职务上终其一生。就我所接触的世界一面，来叙述他们的爱憎与哀乐，即或这枝笔如何笨拙，或尚不至于离题太远。因为他们是正直的，诚实的，生活有些方面极其伟大，有些方其又极其平凡，性情有些方面极其美丽，有些方面又极其琐碎，——我动手写他们时，为了使其更有人性，更近人情，自然便老老实实的写下去。但因此一来，这作品或者便不免成为一种无益之业了。
-				</p>
-				<p>
-					对于农人与兵士，怀了不可言说的温爱，这点感情在我一切作品中，随处都可以看出。我从不隐讳这点感情。我生长于作品中所写到的那类小乡城，我的祖父，父亲以及兄弟，全列身军籍：死去的莫不在职务上死去，不死的也必然的将在职务上终其一生。就我所接触的世界一面，来叙述他们的爱憎与哀乐，即或这枝笔如何笨拙，或尚不至于离题太远。因为他们是正直的，诚实的，生活有些方面极其伟大，有些方其又极其平凡，性情有些方面极其美丽，有些方面又极其琐碎，——我动手写他们时，为了使其更有人性，更近人情，自然便老老实实的写下去。但因此一来，这作品或者便不免成为一种无益之业了。
-				</p>
-				<p>
-					对于农人与兵士，怀了不可言说的温爱，这点感情在我一切作品中，随处都可以看出。我从不隐讳这点感情。我生长于作品中所写到的那类小乡城，我的祖父，父亲以及兄弟，全列身军籍：死去的莫不在职务上死去，不死的也必然的将在职务上终其一生。就我所接触的世界一面，来叙述他们的爱憎与哀乐，即或这枝笔如何笨拙，或尚不至于离题太远。因为他们是正直的，诚实的，生活有些方面极其伟大，有些方其又极其平凡，性情有些方面极其美丽，有些方面又极其琐碎，——我动手写他们时，为了使其更有人性，更近人情，自然便老老实实的写下去。但因此一来，这作品或者便不免成为一种无益之业了。
-				</p>
+				<!-- 文章页面 静态数据 -->
+				<!-- <h4></h4>
+				<p></p> -->
 			</div>
 			<div class="m-button-bar">
 				<ul class="u-tab">
@@ -346,22 +339,23 @@
 					var StorageSetter = function(key, val) {
 						return localStorage.setItem(prefix + key, val);
 					}
-					var Stor = function(url,callback){
+					var getBSONP = function(url,callback){
 						return $.jsonp({
 							url,
 							cache:true,
 							callback : "duokan_fiction_chapter",
 							success : function(result) {
-								debugger
+								
 								var data = $.base64.decode(result);
 								var json = decodeURIComponent(escape(data));
-								callback(data);
+								// debugger
+								callback(json);
 							}
 						});
 					};
 
 					return {
-						Stor,
+						getBSONP,
 						StorageSetter,
 						StorageGetter
 					}
@@ -389,19 +383,31 @@
 
 				function main(){
 					//整个项目的入口函数
+					
+					//取回数据
 					var readerModel = ReaderModel();
-					readerModel.init();
+					//初始化UI
+					var readerUI = ReaderBaseFrame(RootContainer);
+					
+					readerModel.init(function(data){
+						readerUI(data);
+					});
+					
+
 					EventHanlder();
+
+
 				}
 
 
 				function ReaderModel(){
 					//todo 实现和阅读器相关的数据交互方法
 					var Chapter_id;
-					var init = function(){
+					var init = function(UIcallback){
 						getFictionInfo(function(){
-							getCurChapterContent(Chapter_id,function(){
+							getCurChapterContent(Chapter_id,function(data){
 								//TODO...
+								UIcallback && UIcallback(data);
 							})
 						})
 					}
@@ -412,19 +418,17 @@
 							Chapter_id = data.chapters[1].chapter_id;
 
 							callback && callback();
-						},'json');	
+						},'json');
 					}
 
-					var getCurChapterContent = function(chapter_id,data){
-						$.get('data/data'+ chapter_id + '.json',function () {
+					var getCurChapterContent = function(chapter_id,callback){
+						$.get('data/data'+ chapter_id + '.json',function (data) {
 							if (data.result == 0) {
 
 								var url = data.jsonp;
 								Util.getBSONP(url,function(data){
 									callback && callback(data)
 								});
-							}else{
-
 							}
 						},'json')
 					}
@@ -433,8 +437,27 @@
 						init
 					}
 				}
-				function ReaderBaseFrame(){
+				function ReaderBaseFrame(container){
 					//渲染基本的UI结构
+					function parseChapterData(jsonData){
+						//解析章节数据
+						var jsonObj = JSON.parse(jsonData);
+						var html = '<h4>' + jsonObj.t + '</h4>';
+						for(var i = 0;i< jsonObj.p.length; i++){
+							html += '<p>'+ jsonObj.p[i] + '</p>';
+						}
+						console.log(html);
+						return html;
+						console.log(html);
+					}
+					return function(data){
+						//放到指定容器内
+						//调用数据解析结构
+						container.html(parseChapterData(data));
+					}
+
+
+
 				}
 				function EventHanlder(){
 					//交互事件绑定
