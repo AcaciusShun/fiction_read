@@ -417,8 +417,10 @@
 					var getFictionInfo = function(callback){
 						$.get('data/chapter.json',function(data){
 							//获得章节信息之后的回调
-							
-							Chapter_id = data.chapters[1].chapter_id;
+							Chapter_id = Util.StorageGetter('last_chapter_id');
+							if (Chapter_id == null) {
+								Chapter_id = data.chapters[1].chapter_id;
+							}
 							ChapterTotal = data.chapters.length;
 							callback && callback();
 						},'json');
@@ -443,7 +445,9 @@
 							return;
 						}
 						Chapter_id -= 1;
-						getCurChapterContent(Chapter_id,UIcallback)
+
+						getCurChapterContent(Chapter_id,UIcallback);
+						Util.StorageSetter('last_chapter_id',Chapter_id);
 					}
 					//翻下一页
 					var nextChapter = function(UIcallback){
@@ -452,7 +456,8 @@
 							return;
 						}
 						Chapter_id += 1;
-						getCurChapterContent(Chapter_id,UIcallback)
+						getCurChapterContent(Chapter_id,UIcallback);
+						Util.StorageSetter('last_chapter_id',Chapter_id);
 					}
 					return {
 						init,
