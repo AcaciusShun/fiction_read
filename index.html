@@ -539,12 +539,14 @@
 						readerModel.prenChapter(function(data){
 							readerUI(data);
 						});
+						document.documentElement.scrollTop = document.body.scrollTop =0;
 					});
 
 					$('#next_button').click(function(){
 						readerModel.nextChapter(function(data){
 							readerUI(data);
 						});
+						document.documentElement.scrollTop = document.body.scrollTop =0;
 					});
 
 
