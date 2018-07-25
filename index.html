@@ -361,6 +361,14 @@
 				} 
 				var Win = $(window);
 				var Doc = $(document);
+				var RootContainer = $('#xiaoshuo_container');
+				var initFontSize = Util.StorageGetter('font-size');
+				initFontSize = parseInt(initFontSize);
+				if (!initFontSize) {
+					initFontSize =14; 
+				}
+				RootContainer.css('font-size',initFontSize);
+				// var initLineHeight = 24;
 				function main(){
 					//整个项目的入口函数
 					EventHanlder();
@@ -397,7 +405,26 @@
 
 					$('#night-button').click(function(){
 						//触发背景切换事件
-					})
+					});
+
+					$('#large-font').click(function(){
+						console.log(initFontSize);
+						if (initFontSize > 18) {
+							return;
+						}
+						initFontSize += 1;
+						RootContainer.css('font-size',initFontSize);
+						Util.StorageSetter('font-size',initFontSize);
+					});
+					$('#small-font').click(function(){
+						console.log(initFontSize);
+						if (initFontSize < 12) {
+							return;
+						}
+						initFontSize -= 1;
+						RootContainer.css('font-size',initFontSize);
+						Util.StorageSetter('font-size',initFontSize);
+					});
 
 
 
