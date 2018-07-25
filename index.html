@@ -407,36 +407,76 @@
 					var Chapter_id;
 					var ChapterTotal;
 					var init = function(UIcallback){
-						getFictionInfo(function(){
-							getCurChapterContent(Chapter_id,function(data){
-								//TODO...
-								UIcallback && UIcallback(data);
-							})
-						})
+						// getFictionInfo(function(){
+						// 	getCurChapterContent(Chapter_id,function(data){
+						// 		//TODO...
+						// 		UIcallback && UIcallback(data);
+						// 	})
+						// })
+						getFictionInfoPromise().then(function(d){
+							return getCurChapterContentPromise();
+						}).then(function(data){
+							UIcallback && UIcallback(data);
+						});
 					}
-					var getFictionInfo = function(callback){
+					// var getFictionInfo = function(callback){
+					// 	$.get('data/chapter.json',function(data){
+					// 		//获得章节信息之后的回调
+					// 		Chapter_id = Util.StorageGetter('last_chapter_id');
+					// 		if (Chapter_id == null) {
+					// 			Chapter_id = data.chapters[1].chapter_id;
+					// 		}
+					// 		ChapterTotal = data.chapters.length;
+					// 		callback && callback();
+					// 	},'json');
+					// }
+
+					var getFictionInfoPromise = function(){
+					return new Promise(function(res,rej){
 						$.get('data/chapter.json',function(data){
 							//获得章节信息之后的回调
-							Chapter_id = Util.StorageGetter('last_chapter_id');
-							if (Chapter_id == null) {
-								Chapter_id = data.chapters[1].chapter_id;
-							}
-							ChapterTotal = data.chapters.length;
-							callback && callback();
-						},'json');
-					}
-
-					var getCurChapterContent = function(chapter_id,callback){
-						$.get('data/data'+ chapter_id + '.json',function (data) {
 							if (data.result == 0) {
-
-								var url = data.jsonp;
-								Util.getBSONP(url,function(data){
-									callback && callback(data)
-								});
+								Chapter_id = Util.StorageGetter('last_chapter_id');
+							
+								if (Chapter_id == null) {
+									Chapter_id = data.chapters[1].chapter_id;
+								}
+								ChapterTotal = data.chapters.length;
+								res();
+							}else{
+								rej();
 							}
-						},'json')
+							
+						},'json');
+					})
+				}
+					var getCurChapterContentPromise = function(){
+						return new Promise(function(res,rej){
+							$.get('data/data'+ Chapter_id + '.json',function (data) {
+								if (data.result == 0) {
+									var url = data.jsonp;
+									Util.getBSONP(url,function(data){
+										res(data);
+									});
+								}else{
+									rej();
+									}
+								},'json');
+							});
 					}
+
+					// var getCurChapterContent = function(chapter_id,callback){
+					// 	$.get('data/data'+ chapter_id + '.json',function (data) {
+					// 		if (data.result == 0) {
+
+					// 			var url = data.jsonp;
+					// 			Util.getBSONP(url,function(data){
+					// 				callback && callback(data)
+					// 			});
+					// 		}
+					// 	},'json');
+
+					// }
 
 					//翻上一页
 					var prenChapter = function(UIcallback){
@@ -446,7 +486,7 @@
 						}
 						Chapter_id -= 1;
 
-						getCurChapterContent(Chapter_id,UIcallback);
+						getCurChapterContentPromise();
 						Util.StorageSetter('last_chapter_id',Chapter_id);
 					}
 					//翻下一页
@@ -456,7 +496,7 @@
 							return;
 						}
 						Chapter_id += 1;
-						getCurChapterContent(Chapter_id,UIcallback);
+						getCurChapterContentPromise();
 						Util.StorageSetter('last_chapter_id',Chapter_id);
 					}
 					return {
